@@ -40,10 +40,14 @@ if (not -f $atop_cache_memcmd) {
 if (-f $atop_cache_memcmd and scalar @ARGV) {
   my $filter = $ARGV[0];
   my ($avgmem, $maxmem, $c) = (0, 0, 0);
-  open(my $fh, '-|', qq(grep '$filter' $atop_cache_memcmd | awk '{ print \$2 }')) or die;
+  open(my $fh, '-|', qq(grep -E '$filter' $atop_cache_memcmd | awk '{ print \$2 }')) or die;
   while (<$fh>) { ++$c; $avgmem += $_; $maxmem = $_ if $_ > $maxmem; };
-  ($avgmem, $maxmem) = ($avgmem / 1024.0 / $c, $maxmem / 1024.0);
-  printf "%s: avg: %d MB, max: %d MB\n", $filter, $avgmem, $maxmem;
+  if ($c > 0) {
+    ($avgmem, $maxmem) = ($avgmem / 1024.0 / $c, $maxmem / 1024.0);
+    printf "%s: avg: %d MB, max: %d MB\n", $filter, $avgmem, $maxmem;
+  } else {
+    print "not found\n";
+  }
 }
 
 
